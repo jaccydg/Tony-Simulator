@@ -1,2 +1,3 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿// 1. Ask for gateways and columns
+
+// 2. Insert in a queue logs analytics for each gateway.
