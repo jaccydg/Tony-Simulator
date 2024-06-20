@@ -12,11 +12,12 @@ namespace EdgeComputerSimulator.Library.Models
 
         public decimal MinSpeed { get; private set; } // Unit of measure: kW
         public decimal MaxSpeed { get; private set; } // Unit of measure: kW
-        public required EVCLevel EVClevel { get; init; }
+        public EVCLevel EVClevel { get; init; }
 
-        EVChargerLevel(EVCLevel evclevel)
+        public EVChargerLevel(EVCLevel eVClevel)
         {
-            EVClevel = evclevel;
+            EVClevel = eVClevel;
+            SetSpeedRange();
         }
 
         private void SetSpeedRange()

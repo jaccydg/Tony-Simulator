@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace EdgeComputerSimulator.Library.Enums
 {
-    public enum Status
+    public enum ChargingStationStatus // Charging Station = Column
     {
         Free, // The column is free
         Charging, // A user is connected and the column is charging.
-        Completed, // A user finished his charge and disconnected from the column.
-        Idle // A user finished charging but didn't disconnect from the column yet.
+        Completed, // It's only for the last log of a charging session.
+        Idle // A user is connected to the column but the car is not getting charged yet.
     }
 
 }

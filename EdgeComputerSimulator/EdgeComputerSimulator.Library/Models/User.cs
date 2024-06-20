@@ -9,7 +9,7 @@ namespace EdgeComputerSimulator.Library.Models
 {
     public class User
     {
-        public required Guid Id { get; init; } = Guid.NewGuid();
+        public Guid Id { get; init; } = Guid.NewGuid();
         public required Subscription Sub { get; init; }
     }
 }
