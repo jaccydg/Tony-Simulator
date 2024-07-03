@@ -10,50 +10,54 @@ using Amazon.SQS;
 using Amazon.SQS.Model;
 using Amazon.Runtime;
 using EdgeComputerSimulator.Library.AwsQueue;
+using System.Net.Http.Json;
+using EdgeComputerSimulator.Library.Dtos;
+using EdgeComputerSimulator.Console.RNDlogs;
+using System.Text.Json;
+using EdgeComputerSimulator.Console.RNDlogs.Json;
+using System.Text.Json.Serialization;
 
-var columns = new List<Column>
-            {
-                new() {Status = ChargingStationStatus.Charging},
-                new() {Status = ChargingStationStatus.Free},
-                new() {Status = ChargingStationStatus.Free}
-            };
 
-columns.First().ConnectUser(new User() { Sub = Subscription.Basic });
-
-// Initialize DataForLogRandomization object
-var dataLogRandomization = new DataForLogRandomization
-{
-    EVChargerLevelOfColumns = new EVChargerLevel(EVCLevel.Level2),
-    LogIntervalSendingTime = TimeSpan.FromSeconds(2)
-};
-
-// Create an instance of the Gateway class
-var gateway = new Gateway
-(
-    columns,
-    dataLogRandomization,
-    code: "T391G"
-);
 
 //gateway.StartChargingAColumn(gateway.Columns.First().Id);
 //Console.ReadLine();
 
 
-// REQUESTS HANDLING
 
-// Connection request data:
-// request : connection --> To know that it's a connection request.
-// IdUtente : Guid
-// IdColonnina : int
-// IdGateway : int
+public class Program
+{
+    private static readonly HttpClient client = new HttpClient();
 
-// Request acceptance logic:
-// Send Accepted in the queue --> If the status of the column is Free.
-// Send Refused in the queue --> With any other column status.
+    public static async Task Main(string[] args)
+    {
+        try
+        {
+            var chargingStations = await GetChargingStationsAsync("http://localhost:3000/ChargingStations");
+            foreach (var station in chargingStations)
+            {
+                Console.WriteLine($"ID: {station.Id}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred: {ex.Message}");
+        }
+    }
 
-string queueUrl = "https://sqs.eu-west-1.amazonaws.com/240595528763/clod-digregorio-projectwork-2.fifo";
-var credentials = AwsQueueConnector.LoadAWSCredentials();
+    public static async Task<List<ColumnListDto>> GetChargingStationsAsync(string url)
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
 
-var sqsClient = new AmazonSQSClient(credentials, RegionEndpoint.EUWest1);
+        var response = await client.GetStringAsync(url);
+        var container = JsonSerializer.Deserialize<ColumnListDtoContainer>(response, options);
 
-// TODO --> Here I've to make a script to send the random logs in the queue.
+        //TODO
+        return new List<ColumnListDto>();
+    }
+
+}

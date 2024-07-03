@@ -11,6 +11,18 @@ using EdgeComputerSimulator.Library.AwsQueue;
 // In this program there will only be the retriving of requests from the AWS queue
 // It will handle the requests answering by following some logics.
 
+// REQUESTS HANDLING
+
+// Connection request data:
+// request : connection --> To know that it's a connection request.
+// IdUtente : Guid
+// IdColonnina : int
+// IdGateway : int
+
+// Request acceptance logic:
+// Send Accepted in the queue --> If the status of the column is Free.
+// Send Refused in the queue --> With any other column status.
+
 string queueUrl = "https://sqs.eu-west-1.amazonaws.com/240595528763/clod-digregorio-projectwork-2.fifo";
 
 var credentials = AwsQueueConnector.LoadAWSCredentials();
