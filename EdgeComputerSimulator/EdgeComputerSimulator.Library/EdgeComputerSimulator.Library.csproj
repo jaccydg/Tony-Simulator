@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.SQS" Version="3.7.301.26" />
     <PackageReference Include="Spectre.Console" Version="0.49.1" />
   </ItemGroup>
 
