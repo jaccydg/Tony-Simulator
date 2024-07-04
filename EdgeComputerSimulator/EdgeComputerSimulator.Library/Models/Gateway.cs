@@ -10,31 +10,37 @@ namespace EdgeComputerSimulator.Library.Models
 {
     public class Gateway
     {
-        public Guid Id { get; } = Guid.NewGuid();
+        public Guid Id { get; private set; }
 
         private IList<Column> _columns;
-        public IList<Column> Columns {
+        public IList<Column> Columns
+        {
             get => _columns;
-            init 
+            set
             {
-                for(int i = 0; i < value.Count - 1; i++)
-                {
-                    value[i].Number = i + 1;
-                }
-                _columns = value;
+                //for (int i = 0; i < value.Count - 1; i++)
+                //{
+                //    value[i].Number = i + 1;
+                //}
+                //_columns = value;
             }
         }
-        public string Code { get; init; } = string.Empty;
-        public DataForLogRandomization DataLogRnd { get; init; }
+        public string Code { get; private set; } = string.Empty;
+        public DataForLogRandomization DataLogRnd { get; private set; }
 
-        //public double Latitude { get; init; }
-        //public double Longitude { get; init; }
+        public double Latitude { get; private set; }
+        public double Longitude { get; private set; }
 
-        public Gateway(IList<Column> columns, DataForLogRandomization dataLogRnd, string code)
+
+
+        public Gateway(IList<Column> columns, DataForLogRandomization dataLogRnd, string code, Guid id, double latitude, double longitude)
         {
             Columns = columns;
             DataLogRnd = dataLogRnd;
             Code = code;
+            Id = id;
+            Latitude = latitude;
+            Longitude = longitude;
         }
 
         public void StartChargingAColumn(Guid colId)
@@ -64,7 +70,7 @@ namespace EdgeComputerSimulator.Library.Models
             // 2. Occupation percentage.
 
         }
-        
+
     }
     public record DataForLogRandomization
     {

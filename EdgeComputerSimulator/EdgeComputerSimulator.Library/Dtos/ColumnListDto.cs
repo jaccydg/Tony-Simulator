@@ -12,7 +12,7 @@ namespace EdgeComputerSimulator.Library.Dtos
         public required Guid Id { get; init; }
         public required int Number { get; init; }
         public required ChargingStationStatus Status { get; init; }
-        public required Guid UserConnectedId { get; init; }
+        public required Guid? UserConnectedId { get; init; } = null;
         public required Guid GatewayId { get; init; }
     }
 }

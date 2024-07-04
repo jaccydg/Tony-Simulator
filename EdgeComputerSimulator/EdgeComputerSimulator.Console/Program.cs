@@ -12,10 +12,10 @@ using Amazon.Runtime;
 using EdgeComputerSimulator.Library.AwsQueue;
 using System.Net.Http.Json;
 using EdgeComputerSimulator.Library.Dtos;
-using EdgeComputerSimulator.Console.RNDlogs;
 using System.Text.Json;
-using EdgeComputerSimulator.Console.RNDlogs.Json;
 using System.Text.Json.Serialization;
+using Newtonsoft.Json;
+using EdgeComputerSimulator.Library;
 
 
 
@@ -32,32 +32,81 @@ public class Program
     {
         try
         {
-            var chargingStations = await GetChargingStationsAsync("http://localhost:3000/ChargingStations");
+            var chargingStations = await GetChargingStationsAsync("https://tonyapi.ddns.net/ChargingStations");
+            var gateways = await GetGatewaysAsync("https://tonyapi.ddns.net/Gateways");
+
             foreach (var station in chargingStations)
             {
-                Console.WriteLine($"ID: {station.Id}");
+                Console.WriteLine($"ID STATION: {station.Id}");
             }
+            foreach (var gateway in gateways)
+            {
+                Console.WriteLine($"ID GATEWAY: {gateway.Id}");
+            }
+
+
+            GatewaysCollectionInitialization(gateways, chargingStations);
+
         }
         catch (Exception ex)
         {
             Console.WriteLine($"An error occurred: {ex.Message}");
         }
+
     }
+
+
 
     public static async Task<List<ColumnListDto>> GetChargingStationsAsync(string url)
     {
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
-        };
 
         var response = await client.GetStringAsync(url);
-        var container = JsonSerializer.Deserialize<ColumnListDtoContainer>(response, options);
+        if (response is null) return new();
 
-        //TODO
-        return new List<ColumnListDto>();
+        List<ColumnListDto> columns = JsonConvert.DeserializeObject<List<ColumnListDto>>(response);
+
+        return columns ?? new();
+    
+    }
+    
+    public static async Task<List<GatewayListDto>> GetGatewaysAsync(string url)
+    {
+
+        var response = await client.GetStringAsync(url);
+        if (response is null) return new();
+
+        List<GatewayListDto> gateways = JsonConvert.DeserializeObject<List<GatewayListDto>>(response);
+
+        return gateways ?? new();
+    }
+
+    
+    public static void GatewaysCollectionInitialization(List<GatewayListDto> gateways, List<ColumnListDto> columns)
+    {
+        if (gateways is null)
+        {
+            Console.WriteLine("No gateways found in the db.");
+            return;
+        }
+
+        foreach (var gateway in gateways)
+        {
+            var correspondingColumns = columns.FindAll(col => col.GatewayId == gateway.Id);
+            List<Column> correspondingMappedColumns = new();
+
+            correspondingMappedColumns.AddRange();
+            
+
+            EVChargerLevel evcl = new EVChargerLevel(EVCLevel.Level2);
+            DataForLogRandomization dflr = new() 
+            {
+                EVChargerLevelOfColumns = evcl, 
+                LogIntervalSendingTime = TimeSpan.FromSeconds(2) 
+            };
+
+            GatewaysCollection.Gateways.Add(new Gateway(correspondingColumns, dflr, gateway.Name, gateway.Id, gateway.Latitude, gateway.Longitude));
+        }
+
     }
 
 }
