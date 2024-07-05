@@ -83,22 +83,21 @@ async Task ProcessMessage(IAmazonSQS sqsClient, Message message)
     // If status is free --> send in the answers queue a positive answer.
     // Otherwise --> send in the answers queue a negative answer.
 
+    var columnOfRequest = GatewaysCollection.Gateways.Find(g => g.Id == requestMessage.GatewayId)
+                   .Columns.ToList().Find(c => c.Id == requestMessage.ColumnId);
+
+    if (columnOfRequest is null)
+    {
+        Console.WriteLine("The column doesn't exist.");
+        return;
+    }
+    var answer = new Answer(requestMessage, BoolAnswer.Refused);
+
     switch (requestMessage.RequestType)
     {
         case RequestType.Connection:
             {
-                var column = GatewaysCollection.Gateways.Find(g => g.Id == requestMessage.GatewayId)
-                    .Columns.ToList().Find(c => c.Id == requestMessage.ColumnId);
-
-                if (column is null)
-                {
-                    Console.WriteLine("The column doesn't exist.");
-                    return;
-                }
-
-                var answer = new Answer(requestMessage, BoolAnswer.Refused);
-
-                if (column.Status == ChargingStationStatus.Free)
+                if (columnOfRequest.Status == ChargingStationStatus.Free)
                 {
                     answer = new Answer(requestMessage, BoolAnswer.Accepted);
                 }
@@ -115,6 +114,49 @@ async Task ProcessMessage(IAmazonSQS sqsClient, Message message)
             }
         case RequestType.Charge:
             {
+                if (columnOfRequest.Status == ChargingStationStatus.Idle)
+                {
+                    answer = new Answer(requestMessage, BoolAnswer.Accepted);
+                }
+
+                var sendMessageRequest = new SendMessageRequest
+                {
+                    QueueUrl = queueAnswerUrl,
+                    MessageBody = answer.ToString(),
+                    MessageGroupId = "groupId",
+                    MessageDeduplicationId = Guid.NewGuid().ToString()
+                };
+                var sendMessageResponse = await sqsClient.SendMessageAsync(sendMessageRequest);
+
+                break;
+            }
+
+        case RequestType.Disconnection:
+            {
+                try
+                {
+                    bool acceptDisconnection = columnOfRequest.Status == ChargingStationStatus.Idle &&
+                        requestMessage.UserId.Equals(columnOfRequest.ConnectedUser.Id);
+
+                    if (acceptDisconnection)
+                    {
+                        answer = new Answer(requestMessage, BoolAnswer.Accepted);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    break;
+                }
+
+                var sendMessageRequest = new SendMessageRequest
+                {
+                    QueueUrl = queueAnswerUrl,
+                    MessageBody = answer.ToString(),
+                    MessageGroupId = "groupId",
+                    MessageDeduplicationId = Guid.NewGuid().ToString()
+                };
+                var sendMessageResponse = await sqsClient.SendMessageAsync(sendMessageRequest);
 
                 break;
             }

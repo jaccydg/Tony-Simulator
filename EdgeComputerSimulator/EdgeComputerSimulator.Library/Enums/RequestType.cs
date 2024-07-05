@@ -9,6 +9,7 @@ namespace EdgeComputerSimulator.Library.Enums
     public enum RequestType
     {
         Connection,
-        Charge
+        Charge,
+        Disconnection
     }
 }
