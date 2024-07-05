@@ -16,6 +16,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 using EdgeComputerSimulator.Library;
+using Spectre.Console;
 
 
 
@@ -30,10 +31,13 @@ public class Program
 
     public static async Task Main(string[] args)
     {
+
         try
         {
-            var chargingStations = await GetChargingStationsAsync("https://tonyapi.ddns.net/ChargingStations");
-            var gateways = await GetGatewaysAsync("https://tonyapi.ddns.net/Gateways");
+            //var chargingStations = await GetChargingStationsAsync("https://tonyapi.ddns.net/ChargingStations");
+            var chargingStations = await GetChargingStationsAsync("http://localhost:3000/ChargingStations");
+            var gateways = await GetGatewaysAsync("http://localhost:3000/Gateways");
+            //var gateways = await GetGatewaysAsync("https://tonyapi.ddns.net/Gateways");
 
             foreach (var station in chargingStations)
             {
@@ -91,11 +95,10 @@ public class Program
 
         foreach (var gateway in gateways)
         {
-            var correspondingColumns = columns.FindAll(col => col.GatewayId == gateway.Id);
-            List<Column> correspondingMappedColumns = new();
+            var correspondingColumns = FindCorrespondingColumnsOfGateway(columns, gateway);
 
-            correspondingMappedColumns.AddRange();
-            
+            var correspondingMappedColumns = MapDtoColumnsToMyColumns(correspondingColumns);
+
 
             EVChargerLevel evcl = new EVChargerLevel(EVCLevel.Level2);
             DataForLogRandomization dflr = new() 
@@ -104,9 +107,33 @@ public class Program
                 LogIntervalSendingTime = TimeSpan.FromSeconds(2) 
             };
 
-            GatewaysCollection.Gateways.Add(new Gateway(correspondingColumns, dflr, gateway.Name, gateway.Id, gateway.Latitude, gateway.Longitude));
+            GatewaysCollection.Gateways.Add(new Gateway(correspondingMappedColumns, dflr, gateway.Name, gateway.Id, gateway.Latitude, gateway.Longitude));
+
+            int a = 0;
         }
 
+    }
+
+    private static List<ColumnListDto> FindCorrespondingColumnsOfGateway(List<ColumnListDto> columns, GatewayListDto gateway)
+    {
+        return columns.FindAll(col => col.GatewayId == gateway.Id);
+        
+    }
+
+    private static List<Column> MapDtoColumnsToMyColumns(List<ColumnListDto> dtoColumns) 
+    {
+        List<Column> mappedColumns = new();
+
+        foreach (var col in dtoColumns)
+        {
+            mappedColumns.Add(new()
+            {
+                Id = col.Id,
+                Number = col.Number,
+                Status = col.Status,
+            });
+        }
+        return mappedColumns;
     }
 
 }

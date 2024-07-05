@@ -9,10 +9,10 @@ namespace EdgeComputerSimulator.Library.AwsQueue
 {
     public class Request
     {
-        public required RequestType RequestType { get; init; }
-        public required Guid UserId { get; init; }
-        public required Guid ColumnId { get; init; }
-        public required Guid GatewayId { get; init; }
+        public RequestType RequestType { get; set; }
+        public Guid UserId { get; set; }
+        public Guid ColumnId { get; set; }
+        public Guid GatewayId { get; set; }
 
     }
 }

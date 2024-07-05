@@ -18,11 +18,7 @@ namespace EdgeComputerSimulator.Library.Models
             get => _columns;
             set
             {
-                //for (int i = 0; i < value.Count - 1; i++)
-                //{
-                //    value[i].Number = i + 1;
-                //}
-                //_columns = value;
+                _columns = value;
             }
         }
         public string Code { get; private set; } = string.Empty;

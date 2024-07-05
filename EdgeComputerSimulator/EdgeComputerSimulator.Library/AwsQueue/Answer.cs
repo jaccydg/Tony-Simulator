@@ -1,9 +1,12 @@
-﻿using EdgeComputerSimulator.Library.Enums;
+﻿using Amazon.SQS.Model;
+using EdgeComputerSimulator.Library.Enums;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace EdgeComputerSimulator.Library.AwsQueue
 {
@@ -25,5 +28,9 @@ namespace EdgeComputerSimulator.Library.AwsQueue
             GatewayId = request.GatewayId;
         }
 
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+        }
     }
 }

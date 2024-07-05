@@ -8,7 +8,7 @@ namespace EdgeComputerSimulator.Library.Models
 {
     public class Column
     {
-        public Guid Id { get; } = Guid.NewGuid();
+        public required Guid Id { get; init; }
 
         private ChargingStationStatus _status;
         public required ChargingStationStatus Status
@@ -23,18 +23,18 @@ namespace EdgeComputerSimulator.Library.Models
                 _status = value;
             }
         }
-        public int Number { get; set; } // It's set in the gateway because it depends on how many other columns the gateway already has.
+        public required int Number { get; init; } // It's set in the gateway because it depends on how many other columns the gateway already has.
         /// <summary>
         /// It's set back to null every time a new user attaches.
         /// </summary>
-        public ChargingLog? LastLogOfCurrentCharge { get; set; } = null;
+        public ChargingLog? LastLogOfCurrentCharge { get; private set; } = null;
 
         /// <summary>
         /// Starts being null, it's initialized when the method RandomizeLogData is called and then it is set back
         /// to null when the method SendLogsFromEachColumn() of Gateway obj is called.
         /// </summary>
         public ChargingLog? LogToSend { get; private set; } = null;
-        public User? ConnectedUser { get; private set; } = null;
+        public User? ConnectedUser { get; set; } = null;
 
 
         private System.Timers.Timer _timer;
